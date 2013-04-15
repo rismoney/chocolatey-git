@@ -51,6 +51,7 @@ Describe "Chocopackages should have valid XML" {
   }
 
   foreach ($file in $chocoinstall) {
+    $pkgname=(get-item "$file\..").parent.name
     $array = @()
     $urlsplit = @()
     $array += gc $file
@@ -61,20 +62,12 @@ Describe "Chocopackages should have valid XML" {
          write-output "cannot interpolate urls with variables"
         }
         else {
-          # $finalurl=([Uri]$rawurl)
-          # $finaluri=$finalurl.absoluteuri
-          # $finaluri
-             [array]$urls += $rawurl
-
+          It "$pkgname contains url $url and should be reachable" {
+            $valid_url = Validate-Url $rawurl
+            $valid_url.should.be('True')
+          }
         }
       }
-    }
-  }
-
-  foreach ($url in $urls) {
-    It "$pkgname contains url $url and should be reachable" {
-     $valid_url = Validate-Url $url
-     $valid_url.should.be('True')
     }
   }
 }
