@@ -2,21 +2,15 @@ chocolatey-git
 ==============
 
 
-this is a container for tooling around chocolatey and git. 
-
-currently it is in experimental phase with build.ps1
+This repository is a collect of chocolatey tools to be used with git.
 
 build.ps1 can take a properly tagged git repository and create nupkg files
-in a c:\packages folder.  This could be very useful for rebuilding a 
-chocolatey.org, nugetgallery, myget or other similar repository and have
-every package version.
+in a D:\tools\chocolatey.server\app_data\packages folder.
+This could be very useful for rebuilding a chocolatey.org, nugetgallery, myget
+or other similar repository and have every package version.
 
-some functionality is being explored:
-* extend build.ps1 to cpush packages
-* extend build.ps1 to take an pipeline input of packages
-* create-package.ps1 package-version against any tag
-* point chocolatey to a git repository as a source, and be able
-to install a package. 
-* tag new choco relates dynamically
-* chocopackage testing suite using pester
+chocopackages.Tests.ps1 - a set of pester tests to validatate packages
+
+Invoke-Analyzer.ps1 - validate/lint powershell
+
 
