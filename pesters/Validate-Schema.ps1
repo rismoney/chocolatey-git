@@ -18,7 +18,7 @@ function Validate-Schema($xmlFileName) {
 # Check if the provided file exists
 if((Test-Path -Path $xmlFileName) -eq $false)
 {
-    Write-Host "XML validation not possible since no XML file found at '$xmlFileName'"
+    Write-Output "XML validation not possible since no XML file found at '$xmlFileName'"
     exit 2
 }
 
@@ -35,7 +35,7 @@ $readerSettings.ValidationFlags = [System.Xml.Schema.XmlSchemaValidationFlags]::
 $readerSettings.add_ValidationEventHandler(
 {
     # Triggered each time an error is found in the XML file
-    Write-Host $("`nError found in XML: " + $_.Message + "`n") -ForegroundColor Red
+    Write-Output $("`nError found in XML: " + $_.Message + "`n") -ForegroundColor Red
     $errorCount++
 });
 $reader = [System.Xml.XmlReader]::Create($XmlFile.FullName, $readerSettings)

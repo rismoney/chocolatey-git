@@ -1,16 +1,33 @@
-function Validate-Posh ($path, [switch]$verbose) {
+function Validate-Posh
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [string[]]
+        $Path
+    )
 
-  if ($verbose) {
-    $VerbosePreference = ‘Continue’
-  } 
+    process
+    {
+        foreach ($scriptPath in $Path) {
+            $contents = Get-Content -Path $scriptPath
 
-  trap { Write-Warning $_; $false; continue }
-  & `
-  {
-    $contents = get-content $path
-    $contents = [string]::Join([Environment]::NewLine, $contents)
-    [void]$ExecutionContext.InvokeCommand.NewScriptBlock($contents)
-    Write-Verbose "Parsed without errors"
-    $true
-  } 
+            if ($null -eq $contents)
+            {
+                continue
+            }
+
+            $errors = $null
+            $null = [System.Management.Automation.PSParser]::Tokenize($contents, [ref]$errors)
+            if (0 -lt $errors.Count) {
+              New-Object psobject -Property @{
+                  Path = $scriptPath
+                  SyntaxErrorsFound = ($errors.Count -gt 0)
+              }
+            }
+            else {
+              $true
+            }
+        }
+    }
 }
