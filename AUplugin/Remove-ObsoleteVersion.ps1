@@ -10,20 +10,20 @@ function Remove-ObsoleteVersion {
     [string]$gitrepo = $env:au_gitrepo,
     [string]$SimpleServerPath = $env:au_SimpleServerPath
   )
-  
+
   $tags = @()
   $filehash = ""
   $content = ""
   $matches = ""
   $lstree = ""
-  
+
   $tags = git for-each-ref --sort=taggerdate --format="%(refname)" |Select-string -Pattern "^refs/tags/$($PackageName)"
   $tagObj = foreach ($tag in $tags) {
     [string]$cleantag = $tag
     $name = split-path $cleantag.Substring(0,$cleantag.LastIndexOf('-')) -leaf
-     
+
     $splittag = $cleantag.split('-')
-    
+
     [pscustomobject]@{
       name = $name
       ver=[System.Version]$splittag[-1]
@@ -32,7 +32,7 @@ function Remove-ObsoleteVersion {
   }
   # we need the tags in system.version tag order not ascii
   $tagobj=$tagobj |Sort-Object ver
-  
+
   if ($tagObj.count -gt $MaximumVersions) {
     $tagObj=$tagObj[0..($tagObj.Count-($MaximumVersions+1))]
     $total=$tags.count
@@ -43,17 +43,17 @@ function Remove-ObsoleteVersion {
       # we stash to preserve non commited changes while we peruse historical commit tags/branches
       $matches = ''
       # git is case sensitive and we didn't historically enforce this
-      $filevariations = @('ChocolateyInstall.ps1','Chocolateyinstall.ps1','chocolateyInstall.ps1','chocolateyinstall.ps1')
-      foreach ($filevariation in $filevariations) {
-        if (!($lstree)) {
-     
-          $lstree =  (git ls-tree $item.tag $packageName/tools/$filevariation)
-        }
-      }
-      $filehash =  $lstree.split(" ")[2].split("`t")[0]
+
+      $dirname = git ls-tree $item.tag $packagename/
+      $dirname | ForEach-Object {$_ -match "$($packagename)/tools"}
+      $chocofiles = git ls-tree $item.tag "$($matches[0])/"
+      $matches=$null
+      $ci = $chocofiles | ForEach-Object {$_ -match '(.*)(/chocolateyinstall.ps1)'}
+      $filehash =  $matches[0].split(" ")[2].split("`t")[0]
       $content = git show $filehash
+      $matches=$null
       $packagefile = $content | ForEach-Object {$_ -match $matcher}
-  
+
       if ($matches[1]) {
         try {
           remove-item "$($env:au_chocopackagepath)/$($PackageName)/$($matches[1])" -ErrorAction SilentlyContinue
